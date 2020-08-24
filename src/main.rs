@@ -101,20 +101,17 @@ fn main() {
     for course in Course::iter() {
         dbg!(&course);
 
-        let mut teachers: Vec<Teacher> = Vec::new();
-        let mut students: Vec<Student> = Vec::new();
+        let teachers: Vec<Teacher> = teacher_submissions
+            .iter()
+            .filter(|submission| submission.courses.contains(&course))
+            .map(|submission| submission.teacher.clone())
+            .collect();
 
-        for submission in &teacher_submissions {
-            if submission.courses.contains(&course) {
-                teachers.push(submission.teacher.clone());
-            }
-        }
-
-        for submission in &student_submissions {
-            if submission.course_prefs.contains(&course) {
-                students.push(submission.student.clone());
-            }
-        }
+        let students: Vec<Student> = student_submissions
+            .iter()
+            .filter(|submission| submission.course_prefs.contains(&course))
+            .map(|submission| submission.student.clone())
+            .collect();
 
         for class in form_classes(course, teachers, students) {
             classes.push(class);
