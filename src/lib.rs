@@ -56,8 +56,8 @@ impl Class {
 
 pub fn form_classes(
     course: Course,
-    teachers: Vec<Teacher>,
-    mut students: Vec<Student>,
+    mut teachers: Vec<Teacher>,
+    students: Vec<Student>,
 ) -> Vec<Class> {
     // Steps:
     // 1. If there are no students or no teachers, return no classes. ✓
@@ -79,19 +79,31 @@ pub fn form_classes(
 
     let mut classes = Vec::new();
 
-    for teacher in teachers {
-        let students_in_this_class = if remainder > 0 {
-            remainder -= 1;
-            0..(students_per_class + 1)
-        } else {
-            0..students_per_class
-        };
+    {
+        let mut students = students.clone();
 
-        classes.push(Class::new(
-            course.clone(),
-            teacher,
-            students.drain(students_in_this_class).collect(),
-        ));
+        for teacher in &teachers {
+            let students_in_this_class = if remainder > 0 {
+                remainder -= 1;
+                0..(students_per_class + 1)
+            } else {
+                0..students_per_class
+            };
+
+            classes.push(Class::new(
+                course.clone(),
+                teacher.clone(),
+                students.drain(students_in_this_class).collect(),
+            ));
+        }
+    }
+
+    for class in &classes {
+        if class.students.len() < course.min_students {
+            dbg!(teachers.pop());
+            return form_classes(course, teachers, students);
+        } else if class.students.len() > course.max_students {
+        }
     }
 
     classes
@@ -158,7 +170,7 @@ mod class_formation_tests {
 
     #[test]
     fn students_divide_unevenly() {
-        let english = Course::new("English", 2, 5);
+        let english = Course::new("English", 1, 5);
 
         assert_eq!(
             form_classes(
@@ -182,6 +194,24 @@ mod class_formation_tests {
                     vec![Student::new("Student 3")]
                 )
             ]
+        )
+    }
+
+    #[test]
+    fn excess_of_teachers() {
+        let english = Course::new("English", 2, 5);
+
+        assert_eq!(
+            form_classes(
+                english.clone(),
+                vec![Teacher::new("Teacher 1"), Teacher::new("Teacher 2")],
+                vec![Student::new("Student 1"), Student::new("Student 2")]
+            ),
+            vec![Class::new(
+                english,
+                Teacher::new("Teacher 1"),
+                vec![Student::new("Student 1"), Student::new("Student 2")]
+            )]
         )
     }
 }
