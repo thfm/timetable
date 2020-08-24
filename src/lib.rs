@@ -128,7 +128,7 @@ mod class_formation_tests {
 
     #[test]
     fn students_divide_evenly() {
-        let english = Course::new("English", 5, 5);
+        let english = Course::new("English", 2, 5);
 
         assert_eq!(
             form_classes(
@@ -158,7 +158,7 @@ mod class_formation_tests {
 
     #[test]
     fn students_divide_unevenly() {
-        let english = Course::new("English", 5, 5);
+        let english = Course::new("English", 2, 5);
 
         assert_eq!(
             form_classes(
