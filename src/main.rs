@@ -38,8 +38,8 @@ struct StudentSubmission {
 }
 
 impl StudentSubmission {
-    fn new(student: Student, course_prefs: Vec<Course>) -> StudentSubmission {
-        StudentSubmission {
+    fn new(student: Student, course_prefs: Vec<Course>) -> Self {
+        Self {
             student,
             course_prefs,
         }
@@ -52,8 +52,8 @@ struct TeacherSubmission {
 }
 
 impl TeacherSubmission {
-    fn new(teacher: Teacher, courses: Vec<Course>) -> TeacherSubmission {
-        TeacherSubmission { teacher, courses }
+    fn new(teacher: Teacher, courses: Vec<Course>) -> Self {
+        Self { teacher, courses }
     }
 }
 
