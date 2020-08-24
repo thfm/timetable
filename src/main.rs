@@ -1,36 +1,4 @@
-use strum::IntoEnumIterator;
-use strum_macros::EnumIter;
-
-#[derive(Clone, Debug, Eq, PartialEq)]
-struct Student {
-    name: String,
-}
-
-impl Student {
-    fn new(name: impl Into<String>) -> Student {
-        Student { name: name.into() }
-    }
-}
-
-#[derive(Clone, Debug, Eq, PartialEq)]
-struct Teacher {
-    name: String,
-}
-
-impl Teacher {
-    fn new(name: impl Into<String>) -> Teacher {
-        Teacher { name: name.into() }
-    }
-}
-
-#[derive(EnumIter, Debug, Eq, PartialEq)]
-enum Course {
-    Maths,
-    Science,
-    English,
-    History,
-    Geography,
-}
+use timetable::{form_classes, Course, Student, Teacher};
 
 struct StudentSubmission {
     student: Student,
@@ -57,48 +25,41 @@ impl TeacherSubmission {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
-struct Class {
-    course: Course,
-    teacher: Teacher,
-    students: Vec<Student>,
-}
-
-fn form_classes(course: Course, teachers: Vec<Teacher>, students: Vec<Student>) -> Vec<Class> {
-    vec![]
-}
-
 fn main() {
-    let teacher_submissions = vec![
-        TeacherSubmission::new(Teacher::new("Teacher 1"), vec![Course::Maths]),
-        TeacherSubmission::new(
-            Teacher::new("Teacher 2"),
-            vec![Course::History, Course::Geography],
-        ),
+    let maths = Course::new("Maths", 5, 25);
+    let english = Course::new("English", 10, 30);
+    let history = Course::new("History", 5, 30);
+    let science = Course::new("Science", 10, 25);
+
+    let teacher_submissions = [
+        TeacherSubmission::new(Teacher::new("Teacher 1"), vec![maths.clone()]),
+        TeacherSubmission::new(Teacher::new("Teacher 2"), vec![english.clone()]),
     ];
 
-    let student_submissions = vec![
+    let student_submissions = [
         StudentSubmission::new(
             Student::new("Student 1"),
-            vec![Course::Maths, Course::Science],
+            vec![maths.clone(), english.clone()],
         ),
         StudentSubmission::new(
             Student::new("Student 2"),
-            vec![Course::Maths, Course::English],
+            vec![english.clone(), history.clone()],
         ),
         StudentSubmission::new(
             Student::new("Student 3"),
-            vec![Course::English, Course::Science],
+            vec![history.clone(), science.clone()],
         ),
         StudentSubmission::new(
             Student::new("Student 4"),
-            vec![Course::History, Course::Geography],
+            vec![science.clone(), maths.clone()],
         ),
     ];
 
-    let mut classes: Vec<Class> = Vec::new();
+    let courses = [maths, english, history, science];
 
-    for course in Course::iter() {
+    let mut classes = Vec::new();
+
+    for course in &courses {
         dbg!(&course);
 
         let teachers: Vec<Teacher> = teacher_submissions
@@ -113,7 +74,7 @@ fn main() {
             .map(|submission| submission.student.clone())
             .collect();
 
-        for class in form_classes(course, teachers, students) {
+        for class in form_classes(course.clone(), teachers, students) {
             classes.push(class);
         }
     }
@@ -121,40 +82,4 @@ fn main() {
     for class in classes {
         dbg!(class);
     }
-}
-
-#[cfg(test)]
-mod class_formation_tests {
-    use super::*;
-
-    #[test]
-    fn one_teacher_one_class() {
-        assert_eq!(
-            form_classes(
-                Course::English,
-                vec![Teacher::new("Teacher 1")],
-                vec![
-                    Student::new("Student 1"),
-                    Student::new("Student 2"),
-                    Student::new("Student 3")
-                ]
-            ),
-            vec![Class {
-                course: Course::English,
-                teacher: Teacher::new("Teacher 1"),
-                students: vec![
-                    Student::new("Student 1"),
-                    Student::new("Student 2"),
-                    Student::new("Student 3")
-                ]
-            }]
-        )
-    }
-
-    // The following tests will have to take into account class limits on numbers of students.
-    #[test]
-    fn two_teachers_one_class() {}
-
-    #[test]
-    fn two_teachers_two_classes() {}
 }
