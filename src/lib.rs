@@ -57,7 +57,7 @@ impl Class {
 pub fn form_classes(
     course: Course,
     mut teachers: Vec<Teacher>,
-    students: Vec<Student>,
+    mut students: Vec<Student>,
 ) -> Vec<Class> {
     // Steps:
     // 1. If there are no students or no teachers, return no classes. ✓
@@ -100,9 +100,11 @@ pub fn form_classes(
 
     for class in &classes {
         if class.students.len() < course.min_students {
-            dbg!(teachers.pop());
+            teachers.pop();
             return form_classes(course, teachers, students);
         } else if class.students.len() > course.max_students {
+            students.pop();
+            return form_classes(course, teachers, students);
         }
     }
 
@@ -206,6 +208,28 @@ mod class_formation_tests {
                 english.clone(),
                 vec![Teacher::new("Teacher 1"), Teacher::new("Teacher 2")],
                 vec![Student::new("Student 1"), Student::new("Student 2")]
+            ),
+            vec![Class::new(
+                english,
+                Teacher::new("Teacher 1"),
+                vec![Student::new("Student 1"), Student::new("Student 2")]
+            )]
+        )
+    }
+
+    #[test]
+    fn excess_of_students() {
+        let english = Course::new("English", 1, 2);
+
+        assert_eq!(
+            form_classes(
+                english.clone(),
+                vec![Teacher::new("Teacher 1")],
+                vec![
+                    Student::new("Student 1"),
+                    Student::new("Student 2"),
+                    Student::new("Student 3")
+                ]
             ),
             vec![Class::new(
                 english,
