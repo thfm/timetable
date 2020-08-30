@@ -1,3 +1,5 @@
+#![warn(missing_debug_implementations, rust_2018_idioms)]
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Student {
     name: String,
@@ -20,7 +22,7 @@ impl Teacher {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Course {
     name: String,
     min_students: usize,
@@ -59,50 +61,43 @@ pub fn form_classes(
     mut teachers: Vec<Teacher>,
     mut students: Vec<Student>,
 ) -> Vec<Class> {
-    // Steps:
-    // 1. If there are no students or no teachers, return no classes. ✓
-    // 2. Divide the students evenly between each teacher. ✓
-    // 3. If each class is within course boundaries, return the classes.
-    // 4. If any class has less than the minimum amount of students for the course - an excess of
-    //    teachers - then 'remove' one teacher and try forming classes again (until there are no
-    //    more teachers left).
-    // 5. If any class has more than the maximum amount of students for the course - an excess of
-    //    students - then fill up each class to capacity and reject the remaining students.
+    // If there are no students or no teachers, there can't possibly be any classes
     if teachers.is_empty() || students.is_empty() {
         return Vec::new();
     }
 
-    let num_students = students.len();
-    let num_teachers = teachers.len();
-    let students_per_class = num_students / num_teachers;
-    let mut remainder = num_students % num_teachers;
-
-    let mut classes = Vec::new();
+    let mut classes = Vec::with_capacity(teachers.len());
 
     {
         let mut students = students.clone();
 
+        let base_num_of_students_per_class = students.len() / teachers.len();
+        let mut num_leftover_students = students.len() % teachers.len();
+
         for teacher in &teachers {
-            let students_in_this_class = if remainder > 0 {
-                remainder -= 1;
-                0..(students_per_class + 1)
-            } else {
-                0..students_per_class
-            };
+            let mut num_students_in_this_class = base_num_of_students_per_class;
+
+            // If there are leftover students, take one of them and add them to the current class
+            if num_leftover_students > 0 {
+                num_leftover_students -= 1;
+                num_students_in_this_class += 1;
+            }
 
             classes.push(Class::new(
                 course.clone(),
                 teacher.clone(),
-                students.drain(students_in_this_class).collect(),
+                students.drain(0..num_students_in_this_class).collect(),
             ));
         }
     }
 
     for class in &classes {
         if class.students.len() < course.min_students {
+            // If there is an excess of teachers, remove one teacher and try forming classes again
             teachers.pop();
             return form_classes(course, teachers, students);
         } else if class.students.len() > course.max_students {
+            // If there is instead an excess of teachers, remove one student and try forming classes again
             students.pop();
             return form_classes(course, teachers, students);
         }
