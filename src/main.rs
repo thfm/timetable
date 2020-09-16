@@ -26,28 +26,20 @@ impl TeacherSubmission {
 }
 
 fn main() {
-    let maths = Course::new("Maths", 5, 25);
-    let english = Course::new("English", 10, 30);
-    let history = Course::new("History", 5, 30);
-    let science = Course::new("Science", 10, 25);
+    let maths = Course::new("Maths", 1, 5);
+    let science = Course::new("Science", 1, 2);
 
     let teacher_submissions = [
         TeacherSubmission::new(Teacher::new("Teacher 1"), vec![maths.clone()]),
-        TeacherSubmission::new(Teacher::new("Teacher 2"), vec![english.clone()]),
+        TeacherSubmission::new(Teacher::new("Teacher 2"), vec![science.clone()]),
     ];
 
     let student_submissions = [
-        StudentSubmission::new(
-            Student::new("Student 1"),
-            vec![maths.clone(), english.clone()],
-        ),
-        StudentSubmission::new(
-            Student::new("Student 2"),
-            vec![english.clone(), history.clone()],
-        ),
+        StudentSubmission::new(Student::new("Student 1"), vec![maths.clone()]),
+        StudentSubmission::new(Student::new("Student 2"), vec![science.clone()]),
         StudentSubmission::new(
             Student::new("Student 3"),
-            vec![history.clone(), science.clone()],
+            vec![maths.clone(), science.clone()],
         ),
         StudentSubmission::new(
             Student::new("Student 4"),
@@ -55,13 +47,11 @@ fn main() {
         ),
     ];
 
-    let courses = [maths, english, history, science];
+    let courses = [maths, science];
 
     let mut classes = Vec::new();
 
     for course in &courses {
-        dbg!(&course);
-
         let teachers: Vec<Teacher> = teacher_submissions
             .iter()
             .filter(|submission| submission.courses.contains(&course))
@@ -79,7 +69,5 @@ fn main() {
         }
     }
 
-    for class in classes {
-        dbg!(class);
-    }
+    dbg!(classes);
 }
